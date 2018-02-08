@@ -13,6 +13,7 @@ class PgTester
     @port            = opts.fetch(:port) { 6433 }
     @host            = opts.fetch(:host) { 'localhost' }
     @data_dir        = opts.fetch(:data_dir) { '/tmp/pg_tester' }
+    @unix_socket_dir = opts.fetch(:unix_socket_dir) { @data_dir }
     @initdb_path     = opts.fetch(:initdb_path) { shell_out('which initdb') }
     @pgctl_path      = opts.fetch(:pgctl_path) { shell_out('which pg_ctl') }
     @createuser_path = opts.fetch(:createuser_path) { shell_out('which createuser') }
@@ -35,7 +36,7 @@ class PgTester
   end
 
   def rundb()
-    pid = Process.fork { shell_out "#{@pgctl_path} start -o '-p #{@port}' -D #{@data_dir}" }
+    pid = Process.fork { shell_out "#{@pgctl_path} start -o '-p #{@port} --unix_socket_directories=#{@unix_socket_dir}' -D #{@data_dir}" }
     # give a second for postgresql to startup
     sleep(1)
     Process.detach(pid)
